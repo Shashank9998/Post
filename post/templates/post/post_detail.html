@@ -1,0 +1,53 @@
+{% extends "post/base.html" %}
+
+{% block title %}{{ post.title }} | Post Info{% endblock %}
+
+{% block content %}
+<a class="back-button" href="{% url 'post:post_list' %}">Back to Posts</a>
+
+<section class="detail">
+    <div class="photo-wrap">
+        <img src="{{ post.photo.url }}" alt="{{ post.title }}">
+    </div>
+    <div class="detail-info">
+        <p class="eyebrow">Post ID #{{ post.id }}</p>
+        <h1>{{ post.title }}</h1>
+        <p class="muted">Uploaded on {{ post.created_at|date:"d M Y, h:i A" }}</p>
+        <form method="post" action="{% url 'post:delete_post' post.pk %}" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this post?');">
+            {% csrf_token %}
+            <button class="danger-button icon-button" type="submit">
+                <span class="trash-icon" aria-hidden="true"></span>
+                Delete Post
+            </button>
+        </form>
+
+        <form method="post" class="form comment-form">
+            {% csrf_token %}
+            <label>
+                Add Comment
+                {{ form.text }}
+                {{ form.text.errors }}
+            </label>
+            <button type="submit">Add Comment</button>
+        </form>
+    </div>
+</section>
+
+<section class="comments">
+    <div class="section-title">
+        <h2>Comments</h2>
+        <span>{{ post.comments.count }} total</span>
+    </div>
+
+    {% for comment in page_obj %}
+        <article class="comment">
+            <p>{{ comment.text }}</p>
+            <time>{{ comment.created_at|date:"d M Y, h:i A" }}</time>
+        </article>
+    {% empty %}
+        <div class="empty">No comments yet.</div>
+    {% endfor %}
+
+    {% include "post/pagination.html" with page_obj=page_obj %}
+</section>
+{% endblock %}

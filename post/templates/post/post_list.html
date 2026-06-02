@@ -1,0 +1,79 @@
+{% extends "post/base.html" %}
+
+{% block title %}Posts | Post Info{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <p class="eyebrow">Upload, search, comment</p>
+        <h1>Upload posts and view all comments in one place.</h1>
+    </div>
+</section>
+
+<section class="layout">
+    <aside class="panel">
+        <h2>New Post</h2>
+        <form method="post" enctype="multipart/form-data" class="form">
+            {% csrf_token %}
+            <label>
+                Title
+                {{ form.title }}
+                {{ form.title.errors }}
+            </label>
+            <label>
+                Photo
+                {{ form.photo }}
+                {{ form.photo.errors }}
+            </label>
+            <button type="submit">Upload Post</button>
+        </form>
+    </aside>
+
+    <section class="content">
+        <form method="get" class="search">
+            <input type="search" name="q" value="{{ query }}" placeholder="Search by title or ID">
+            <button type="submit">Search</button>
+            {% if query %}
+                <a class="clear-button" href="{% url 'post:post_list' %}">Clear</a>
+            {% endif %}
+        </form>
+
+        {% if recent_searches %}
+            <div class="recent">
+                <span>Recent:</span>
+                {% for item in recent_searches %}
+                    <a href="?q={{ item }}">{{ item }}</a>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="post-grid">
+            {% for post in page_obj %}
+                <article class="post-card">
+                    <a href="{% url 'post:post_detail' post.pk %}">
+                        <img src="{{ post.photo.url }}" alt="{{ post.title }}">
+                    </a>
+                    <div class="post-card-body">
+                        <div class="post-meta">ID #{{ post.id }} · {{ post.created_at|date:"d M Y, h:i A" }}</div>
+                        <h3><a href="{% url 'post:post_detail' post.pk %}">{{ post.title }}</a></h3>
+                        <div class="card-actions">
+                            <p>{{ post.comments.count }} comments</p>
+                            <form method="post" action="{% url 'post:delete_post' post.pk %}" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                                {% csrf_token %}
+                                <button class="danger-button small-button icon-button" type="submit" aria-label="Delete post">
+                                    <span class="trash-icon" aria-hidden="true"></span>
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="empty">No posts found. Upload the first post.</div>
+            {% endfor %}
+        </div>
+
+        {% include "post/pagination.html" with page_obj=page_obj query=query %}
+    </section>
+</section>
+{% endblock %}
