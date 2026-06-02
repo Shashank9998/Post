@@ -1,6 +1,4 @@
-@"
 Django==5.2.5
 gunicorn
 whitenoise
 Pillow==12.1.1
-"@ | Out-File -Encoding utf8NoBOM requirements.txt
